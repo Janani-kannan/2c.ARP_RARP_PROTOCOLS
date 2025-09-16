@@ -17,9 +17,112 @@ stored.
 5. Map the IP address with its MAC address and return the MAC address to client.
 P
 ## PROGRAM - ARP
+## server.py
+```# arp_server.py
+import socket
+
+# Predefined ARP table (IP -> MAC)
+arp_table = {
+    "192.168.1.1": "AA:BB:CC:DD:EE:01",
+    "192.168.1.2": "AA:BB:CC:DD:EE:02",
+    "192.168.1.3": "AA:BB:CC:DD:EE:03"
+}
+
+# Create TCP socket
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind(("localhost", 9999))
+server_socket.listen(1)
+
+print("ARP Server is running...")
+
+conn, addr = server_socket.accept()
+print(f"Connection from {addr}")
+
+while True:
+    ip_address = conn.recv(1024).decode()
+    if not ip_address:
+        break
+    print(f"Received IP: {ip_address}")
+
+    mac_address = arp_table.get(ip_address, "MAC not found")
+    conn.send(mac_address.encode())
+
+conn.close()
+server_socket.close()
+```
+## client.py
+```
+import socket
+
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket.connect(("localhost", 9999))
+
+ip_address = input("Enter IP Address to find MAC: ")
+client_socket.send(ip_address.encode())
+
+mac_address = client_socket.recv(1024).decode()
+print(f"MAC Address for {ip_address} is: {mac_address}")
+
+client_socket.close()
+```
 ## OUPUT - ARP
+
+![WhatsApp Image 2025-09-16 at 3 25 22 PM](https://github.com/user-attachments/assets/68b4c685-209b-4994-90b5-a80a935514c8)
+
 ## PROGRAM - RARP
+## server.py
+```
+# rarp_server.py
+import socket
+
+# Predefined RARP table (MAC -> IP)
+rarp_table = {
+    "AA:BB:CC:DD:EE:01": "192.168.1.1",
+    "AA:BB:CC:DD:EE:02": "192.168.1.2",
+    "AA:BB:CC:DD:EE:03": "192.168.1.3"
+}
+
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind(("localhost", 9998))
+server_socket.listen(1)
+
+print("RARP Server is running...")
+
+conn, addr = server_socket.accept()
+print(f"Connection from {addr}")
+
+while True:
+    mac_address = conn.recv(1024).decode()
+    if not mac_address:
+        break
+    print(f"Received MAC: {mac_address}")
+
+    ip_address = rarp_table.get(mac_address, "IP not found")
+    conn.send(ip_address.encode())
+
+conn.close()
+server_socket.close()
+```
+## client.py
+```
+import socket
+
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket.connect(("localhost", 9998))
+
+mac_address = input("Enter MAC Address to find IP: ")
+client_socket.send(mac_address.encode())
+
+ip_address = client_socket.recv(1024).decode()
+print(f"IP Address for {mac_address} is: {ip_address}")
+
+client_socket.close()
+```
+
 ## OUPUT -RARP
+
+![WhatsApp Image 2025-09-16 at 3 25 36 PM](https://github.com/user-attachments/assets/248fd418-c967-476e-b6df-865d05ef7af0)
+
 ## RESULT
 Thus, the python program for simulating ARP protocols using TCP was successfully 
 executed.
